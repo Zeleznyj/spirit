@@ -2,7 +2,7 @@ template <> inline
 void Method_Solver<Solver::VP>::Initialize ()
 {
     this->forces         = std::vector<vectorfield>( this->noi, vectorfield( this->nos, {0, 0, 0} ) );
-    this->forces_virtual = std::vector<vectorfield>( this->noi, vectorfield( this->nos, {0, 0, 0} ) );
+    this->torques = std::vector<vectorfield>( this->noi, vectorfield( this->nos, {0, 0, 0} ) );
 
     this->configurations_temp  = std::vector<std::shared_ptr<vectorfield>>( this->noi );
     for (int i=0; i<this->noi; i++)
@@ -18,11 +18,11 @@ void Method_Solver<Solver::VP>::Initialize ()
 
 /*
     Template instantiation of the Simulation class for use with the VP Solver.
-		The velocity projection method is often efficient for direct minimization,
-		but deals poorly with quickly varying fields or stochastic noise.
-	Paper: P. F. Bessarab et al., Method for finding mechanism and activation energy
-		   of magnetic transitions, applied to skyrmion and antivortex annihilation,
-		   Comp. Phys. Comm. 196, 335 (2015).
+        The velocity projection method is often efficient for direct minimization,
+        but deals poorly with quickly varying fields or stochastic noise.
+    Paper: P. F. Bessarab et al., Method for finding mechanism and activation energy
+           of magnetic transitions, applied to skyrmion and antivortex annihilation,
+           Comp. Phys. Comm. 196, 335 (2015).
 */
 template <> inline
 void Method_Solver<Solver::VP>::Iteration ()
@@ -39,7 +39,7 @@ void Method_Solver<Solver::VP>::Iteration ()
 
     // Get the forces on the configurations
     this->Calculate_Force(configurations, forces);
-    this->Calculate_Force_Virtual(configurations, forces, forces_virtual);
+    this->Calculate_Torque(configurations, forces, torques);
     
     for (int i = 0; i < noi; ++i)
     {
@@ -96,11 +96,11 @@ void Method_Solver<Solver::VP>::Iteration ()
 template <> inline
 std::string Method_Solver<Solver::VP>::SolverName()
 {
-	return "VP";
+    return "VP";
 };
 
 template <> inline
 std::string Method_Solver<Solver::VP>::SolverFullName()
 {
-	return "Velocity Projection";
+    return "Velocity Projection";
 };

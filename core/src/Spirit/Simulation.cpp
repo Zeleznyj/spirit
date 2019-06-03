@@ -52,14 +52,14 @@ try
     if (image->iteration_allowed)
     {
         // Currently iterating image
-        spirit_throw(Utility::Exception_Classifier::Unknown_Exception, Utility::Log_Level::Warning, fmt::format(
+        spirit_throw(Utility::Exception_Classifier::API_Invalid_Input, Utility::Log_Level::Warning, fmt::format(
             "Tried to use Simulation_Start on image {} of chain {}, but there is already a simulation running.",
             idx_image, idx_chain));
     }
     else if (chain->iteration_allowed)
     {
         // Currently iterating chain
-        spirit_throw(Utility::Exception_Classifier::Unknown_Exception, Utility::Log_Level::Warning, fmt::format(
+        spirit_throw(Utility::Exception_Classifier::API_Invalid_Input, Utility::Log_Level::Warning, fmt::format(
             "Tried to use Simulation_Start on image {} of chain {}, but there is already a simulation running.",
             idx_image, idx_chain));
     }
@@ -105,14 +105,14 @@ try
     if (image->iteration_allowed)
     {
         // Currently iterating image
-        spirit_throw(Utility::Exception_Classifier::Unknown_Exception, Utility::Log_Level::Warning, fmt::format(
+        spirit_throw(Utility::Exception_Classifier::API_Invalid_Input, Utility::Log_Level::Warning, fmt::format(
             "Tried to use Simulation_Start on image {} of chain {}, but there is already a simulation running.",
             idx_image, idx_chain));
     }
     else if (chain->iteration_allowed)
     {
         // Currently iterating chain
-        spirit_throw(Utility::Exception_Classifier::Unknown_Exception, Utility::Log_Level::Warning, fmt::format(
+        spirit_throw(Utility::Exception_Classifier::API_Invalid_Input, Utility::Log_Level::Warning, fmt::format(
             "Tried to use Simulation_Start on image {} of chain {}, but there is already a simulation running.",
             idx_image, idx_chain));
     }
@@ -149,8 +149,11 @@ try
             method = std::shared_ptr<Engine::Method>(
                 new Engine::Method_LLG<Engine::Solver::VP>( image, idx_image, idx_chain ) );
         else
-            spirit_throw(Utility::Exception_Classifier::Unknown_Exception, Utility::Log_Level::Warning, fmt::format(
+        {
+            image->Unlock();
+            spirit_throw(Utility::Exception_Classifier::API_Invalid_Input, Utility::Log_Level::Warning, fmt::format(
                 "Invalid solver_type {}", solver_type));
+        }
 
         image->Unlock();
 
@@ -180,14 +183,14 @@ try
     if (image->iteration_allowed)
     {
         // Currently iterating image
-        spirit_throw(Utility::Exception_Classifier::Unknown_Exception, Utility::Log_Level::Warning, fmt::format(
+        spirit_throw(Utility::Exception_Classifier::API_Invalid_Input, Utility::Log_Level::Warning, fmt::format(
             "Tried to use Simulation_Start on image {} of chain {}, but there is already a simulation running.",
             -1, idx_chain));
     }
     else if (chain->iteration_allowed)
     {
         // Currently iterating chain
-        spirit_throw(Utility::Exception_Classifier::Unknown_Exception, Utility::Log_Level::Warning, fmt::format(
+        spirit_throw(Utility::Exception_Classifier::API_Invalid_Input, Utility::Log_Level::Warning, fmt::format(
             "Tried to use Simulation_Start on image {} of chain {}, but there is already a simulation running.",
             -1, idx_chain));
     }
@@ -228,15 +231,18 @@ try
             else if (solver_type == int(Engine::Solver::Depondt))
                 method = std::shared_ptr<Engine::Method>(
                     new Engine::Method_GNEB<Engine::Solver::Depondt>( chain, idx_chain ) );
-            // else if (solver_type == int(Engine::Solver::NCG))
-            //     method = std::shared_ptr<Engine::Method>(
-            //         new Engine::Method_GNEB<Engine::Solver::NCG>( chain, idx_chain ) );
+            else if (solver_type == int(Engine::Solver::NCG))
+                method = std::shared_ptr<Engine::Method>(
+                    new Engine::Method_GNEB<Engine::Solver::NCG>( chain, idx_chain ) );
             else if (solver_type == int(Engine::Solver::VP))
                 method = std::shared_ptr<Engine::Method>(
                     new Engine::Method_GNEB<Engine::Solver::VP>( chain, idx_chain ) );
             else
-                spirit_throw(Utility::Exception_Classifier::Unknown_Exception, Utility::Log_Level::Warning, fmt::format(
+            {
+                chain->Unlock();
+                spirit_throw(Utility::Exception_Classifier::API_Invalid_Input, Utility::Log_Level::Warning, fmt::format(
                     "Invalid solver_type {}", solver_type));
+            }
 
             chain->Unlock();
 
@@ -265,14 +271,14 @@ try
     if (image->iteration_allowed)
     {
         // Currently iterating image
-        spirit_throw(Utility::Exception_Classifier::Unknown_Exception, Utility::Log_Level::Warning, fmt::format(
+        spirit_throw(Utility::Exception_Classifier::API_Invalid_Input, Utility::Log_Level::Warning, fmt::format(
             "Tried to use Simulation_Start on image {} of chain {}, but there is already a simulation running.",
             idx_image, idx_chain));
     }
     else if (chain->iteration_allowed)
     {
         // Currently iterating chain
-        spirit_throw(Utility::Exception_Classifier::Unknown_Exception, Utility::Log_Level::Warning, fmt::format(
+        spirit_throw(Utility::Exception_Classifier::API_Invalid_Input, Utility::Log_Level::Warning, fmt::format(
             "Tried to use Simulation_Start on image {} of chain {}, but there is already a simulation running.",
             idx_image, idx_chain));
     }
@@ -299,15 +305,18 @@ try
         else if (solver_type == int(Engine::Solver::Depondt))
             method = std::shared_ptr<Engine::Method>(
                 new Engine::Method_MMF<Engine::Solver::Depondt>( image, idx_chain ) );
-        // else if (solver_type == int(Engine::Solver::NCG))
-        //     method = std::shared_ptr<Engine::Method>(
-        //         new Engine::Method_MMF<Engine::Solver::NCG>( image, idx_chain ) );
+        else if (solver_type == int(Engine::Solver::NCG))
+            method = std::shared_ptr<Engine::Method>(
+                new Engine::Method_MMF<Engine::Solver::NCG>( image, idx_chain ) );
         else if (solver_type == int(Engine::Solver::VP))
             method = std::shared_ptr<Engine::Method>(
                 new Engine::Method_MMF<Engine::Solver::VP>( image, idx_chain ) );
         else
-            spirit_throw(Utility::Exception_Classifier::Unknown_Exception, Utility::Log_Level::Warning, fmt::format(
+        {
+            image->Unlock();
+            spirit_throw(Utility::Exception_Classifier::API_Invalid_Input, Utility::Log_Level::Warning, fmt::format(
                 "Invalid solver_type {}", solver_type));
+        }
 
         image->Unlock();
 
@@ -335,14 +344,14 @@ try
     if (image->iteration_allowed)
     {
         // Currently iterating image
-        spirit_throw(Utility::Exception_Classifier::Unknown_Exception, Utility::Log_Level::Warning, fmt::format(
+        spirit_throw(Utility::Exception_Classifier::API_Invalid_Input, Utility::Log_Level::Warning, fmt::format(
             "Tried to use Simulation_Start on image {} of chain {}, but there is already a simulation running.",
             idx_image, idx_chain));
     }
     else if (chain->iteration_allowed)
     {
         // Currently iterating chain
-        spirit_throw(Utility::Exception_Classifier::Unknown_Exception, Utility::Log_Level::Warning, fmt::format(
+        spirit_throw(Utility::Exception_Classifier::API_Invalid_Input, Utility::Log_Level::Warning, fmt::format(
             "Tried to use Simulation_Start on image {} of chain {}, but there is already a simulation running.",
             idx_image, idx_chain));
     }
@@ -393,7 +402,7 @@ try
     else
     {
         // No simulation has been started
-        spirit_throw(Utility::Exception_Classifier::Unknown_Exception, Utility::Log_Level::Warning, fmt::format(
+        spirit_throw(Utility::Exception_Classifier::API_Invalid_Input, Utility::Log_Level::Warning, fmt::format(
             "Tried to use Simulation_SingleShot on image {} of chain {} but no SingleShot simulation has been started.",
             idx_image, idx_chain));
     }
@@ -553,12 +562,12 @@ float Simulation_Get_MaxTorqueComponent(State * state, int idx_image, int idx_ch
         if (Simulation_Running_On_Image(state, idx_image, idx_chain))
         {
             if (state->method_image[idx_image])
-                return (float) state->method_image[idx_image]->getForceMaxAbsComponent();
+                return (float) state->method_image[idx_image]->getTorqueMaxAbsComponent();
         }
         else if (Simulation_Running_On_Chain(state, idx_chain))
         {
             if (state->method_chain)
-                return (float) state->method_chain->getForceMaxAbsComponent();
+                return (float) state->method_chain->getTorqueMaxAbsComponent();
         }
 
         return 0;
@@ -588,7 +597,7 @@ void Simulation_Get_Chain_MaxTorqueComponents(State * state, float * torques, in
             std::vector<scalar> t(chain->noi, 0);
 
             if (state->method_chain)
-                t = state->method_chain->getForceMaxAbsComponent_All();
+                t = state->method_chain->getTorqueMaxAbsComponent_All();
 
             for (int i=0; i<chain->noi; ++i)
             {
@@ -667,8 +676,8 @@ int Simulation_Get_Iteration(State *state, int idx_image, int idx_chain) noexcep
 }
 
 // Get time passed by the simulation in picoseconds
-//		If an LLG simulation is running this returns the cumulatively summed dt.
-//		Otherwise it returns 0.
+//      If an LLG simulation is running this returns the cumulatively summed dt.
+//      Otherwise it returns 0.
 float Simulation_Get_Time(State *state, int idx_image, int idx_chain) noexcept
 {
     try

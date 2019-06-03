@@ -360,8 +360,8 @@ On the example of the LLG Method:
 ### hh:mm:ss, where 0:0:0 is infinity
 llg_max_walltime        0:0:0
 
-### Force convergence parameter
-llg_force_convergence   10e-9
+### Torque convergence parameter
+llg_torque_convergence   10e-9
 
 ### Number of iterations
 llg_n_iterations        2000000

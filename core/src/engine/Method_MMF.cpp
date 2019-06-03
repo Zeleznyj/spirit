@@ -33,10 +33,10 @@ namespace Engine
 
         // History
         this->history = std::map<std::string, std::vector<scalar>>{
-            {"max_torque_component", {this->force_max_abs_component}} };
+            {"max_torque_component", {this->torque_max_abs_component}} };
 
         // We assume that the systems are not converged before the first iteration
-        this->force_max_abs_component = system->mmf_parameters->force_convergence + 1.0;
+        this->torque_max_abs_component = system->mmf_parameters->torque_convergence + 1.0;
 
         this->hessian = MatrixX(3*this->nos, 3*this->nos);
         // Forces
@@ -175,7 +175,7 @@ namespace Engine
     {
         auto& image = *configurations[0];
         auto& force = forces[0];
-        // auto& force_virtual = forces_virtual[0];
+        // auto& torque = torques[0];
         auto& parameters = *this->systems[0]->mmf_parameters;
 
         const int nos = this->nos;
@@ -376,11 +376,11 @@ namespace Engine
     }
 
 
-    // Check if the Forces are converged
+    // Check if the torques are converged
     template <Solver solver>
     bool Method_MMF<solver>::Converged()
     {
-        if (this->force_max_abs_component < this->systems[0]->mmf_parameters->force_convergence) return true;
+        if (this->torque_max_abs_component < this->systems[0]->mmf_parameters->torque_convergence) return true;
         return false;
     }
 
@@ -394,13 +394,13 @@ namespace Engine
     void Method_MMF<solver>::Hook_Post_Iteration()
     {
         // --- Convergence Parameter Update
-        this->force_max_abs_component = 0;
-        // Loop over images to calculate the maximum force components
+        this->torque_max_abs_component = 0;
+        // Loop over images to calculate the maximum torque components
         for (unsigned int img = 0; img < this->systems.size(); ++img)
         {
-            auto fmax = this->Force_on_Image_MaxAbsComponent(*(this->systems[img]->spins), this->forces_virtual[img]);
-            if (fmax > 0) this->force_max_abs_component = fmax;
-            else this->force_max_abs_component = 0;
+            auto fmax = this->Torque_on_Image_MaxAbsComponent(*(this->systems[img]->spins), this->torques[img]);
+            if (fmax > 0) this->torque_max_abs_component = fmax;
+            else this->torque_max_abs_component = 0;
         }
     }
 
@@ -408,7 +408,7 @@ namespace Engine
     void Method_MMF<solver>::Save_Current(std::string starttime, int iteration, bool initial, bool final)
     {
         // History save
-        this->history["max_torque_component"].push_back(this->force_max_abs_component);
+        this->history["max_torque_component"].push_back(this->torque_max_abs_component);
 
         // File save
         if (this->parameters->output_any)
@@ -440,7 +440,7 @@ namespace Engine
                     // File name and comment
                     std::string spinsFile = preSpinsFile + suffix + ".ovf";
                     std::string output_comment = fmt::format( "{} simulation ({} solver)\n#       Iteration: {}\n#       Maximum force component: {}",
-                        this->Name(), this->SolverFullName(), iteration, this->force_max_abs_component );
+                        this->Name(), this->SolverFullName(), iteration, this->torque_max_abs_component );
 
                     // File format
                     IO::VF_FileFormat format = this->systems[0]->mmf_parameters->output_vf_filetype;

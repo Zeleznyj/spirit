@@ -2,10 +2,10 @@ template <> inline
 void Method_Solver<Solver::SIB>::Initialize ()
 {
     this->forces = std::vector<vectorfield>(this->noi, vectorfield(this->nos));  // [noi][nos]
-    this->forces_virtual = std::vector<vectorfield>(this->noi, vectorfield(this->nos));  // [noi][nos]
+    this->torques = std::vector<vectorfield>(this->noi, vectorfield(this->nos));  // [noi][nos]
 
     this->forces_predictor = std::vector<vectorfield>( this->noi, vectorfield( this->nos, {0, 0, 0} ) );
-    this->forces_virtual_predictor = std::vector<vectorfield>( this->noi, vectorfield( this->nos, {0, 0, 0} ) );
+    this->torques_predictor = std::vector<vectorfield>( this->noi, vectorfield( this->nos, {0, 0, 0} ) );
 
     this->configurations_predictor = std::vector<std::shared_ptr<vectorfield>>( this->noi );
     for (int i=0; i<this->noi; i++)
@@ -27,25 +27,25 @@ void Method_Solver<Solver::SIB>::Iteration ()
 
     // First part of the step
     this->Calculate_Force(this->configurations, this->forces);
-    this->Calculate_Force_Virtual(this->configurations, this->forces, this->forces_virtual);
+    this->Calculate_Torque(this->configurations, this->forces, this->torques);
     for (int i = 0; i < this->noi; ++i)
     {
         auto& image     = *this->systems[i]->spins;
         auto& predictor = *this->configurations_predictor[i];
 
-        Solver_Kernels::sib_transform(image, forces_virtual[i], predictor);
+        Solver_Kernels::sib_transform(image, torques[i], predictor);
         Vectormath::add_c_a(1, image, predictor);
         Vectormath::scale(predictor, 0.5);
     }
 
     // Second part of the step
     this->Calculate_Force(this->configurations_predictor, this->forces_predictor);
-    this->Calculate_Force_Virtual(this->configurations_predictor, this->forces_predictor, this->forces_virtual_predictor);
+    this->Calculate_Torque(this->configurations_predictor, this->forces_predictor, this->torques_predictor);
     for (int i = 0; i < this->noi; ++i)
     {
         auto& image     = *this->systems[i]->spins;
 
-        Solver_Kernels::sib_transform(image, forces_virtual_predictor[i], image);
+        Solver_Kernels::sib_transform(image, torques_predictor[i], image);
     }
 };
 

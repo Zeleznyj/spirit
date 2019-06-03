@@ -128,7 +128,7 @@ namespace IO
         config += fmt::format("{:<35} {:d}\n", "llg_output_energy_divide_by_nspins",  parameters->output_energy_divide_by_nspins);
         config += fmt::format("{:<35} {:d}\n", "llg_output_configuration_step",       parameters->output_configuration_step);
         config += fmt::format("{:<35} {:d}\n", "llg_output_configuration_archive",    parameters->output_configuration_archive);
-        config += fmt::format("{:<35} {:e}\n", "llg_force_convergence",               parameters->force_convergence);
+        config += fmt::format("{:<35} {:e}\n", "llg_torque_convergence",               parameters->torque_convergence);
         config += fmt::format("{:<35} {}\n",   "llg_n_iterations",                    parameters->n_iterations);
         config += fmt::format("{:<35} {}\n",   "llg_n_iterations_log",                parameters->n_iterations_log);
         config += fmt::format("{:<35} {}\n",   "llg_seed",                            parameters->rng_seed);
@@ -174,7 +174,7 @@ namespace IO
         config += fmt::format("{:<38} {:d}\n", "gneb_output_energies_interpolated",     parameters->output_energies_interpolated);
         config += fmt::format("{:<38} {:d}\n", "gneb_output_energies_divide_by_nspins", parameters->output_energies_divide_by_nspins);
         config += fmt::format("{:<38} {:d}\n", "gneb_output_chain_step",                parameters->output_chain_step);
-        config += fmt::format("{:<38} {:e}\n", "gneb_force_convergence",                parameters->force_convergence);
+        config += fmt::format("{:<38} {:e}\n", "gneb_torque_convergence",                parameters->torque_convergence);
         config += fmt::format("{:<38} {}\n",   "gneb_n_iterations",                     parameters->n_iterations);
         config += fmt::format("{:<38} {}\n",   "gneb_n_iterations_log",                 parameters->n_iterations_log);
         config += fmt::format("{:<38} {}\n",   "gneb_spring_constant",                  parameters->spring_constant);
@@ -195,7 +195,7 @@ namespace IO
         config += fmt::format("{:<38} {:d}\n", "mmf_output_energy_divide_by_nspins", parameters->output_energy_divide_by_nspins);
         config += fmt::format("{:<38} {:d}\n", "mmf_output_configuration_step",      parameters->output_configuration_step);
         config += fmt::format("{:<38} {:d}\n", "mmf_output_configuration_archive",   parameters->output_configuration_archive);
-        config += fmt::format("{:<38} {:e}\n", "mmf_force_convergence",              parameters->force_convergence);
+        config += fmt::format("{:<38} {:e}\n", "mmf_torque_convergence",              parameters->torque_convergence);
         config += fmt::format("{:<38} {}\n",   "mmf_n_iterations",                   parameters->n_iterations);
         config += fmt::format("{:<38} {}\n",   "mmf_n_iterations_log",               parameters->n_iterations_log);
         config += "############### End MMF Parameters ###############";

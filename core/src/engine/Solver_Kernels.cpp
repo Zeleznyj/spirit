@@ -84,11 +84,8 @@ namespace Solver_Kernels
     }
 
     scalar ncg_beta_polak_ribiere(vectorfield & image, vectorfield & force, vectorfield & residual,
-        vectorfield & residual_last, vectorfield & force_virtual)
+        vectorfield & residual_last, vectorfield & torque)
     {
-        scalar dt = 1e-3;
-        // scalar dt = this->systems[0]->llg_parameters->dt;
-
         scalar top=0, bot=0;
 
         #pragma omp parallel for
@@ -97,9 +94,7 @@ namespace Solver_Kernels
             // Set residuals
             residual_last[i] = residual[i];
             residual[i] = image[i].cross(force[i]);
-            // TODO: this is for comparison with VP etc. and needs to be fixed!
-            //       in fact, all solvers should use the force, not dt*force=displacement
-            force_virtual[i] = dt * residual[i];
+            torque[i] = residual[i];
 
             bot += residual_last[i].dot(residual_last[i]);
             // Polak-Ribiere formula

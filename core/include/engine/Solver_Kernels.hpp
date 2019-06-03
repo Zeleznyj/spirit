@@ -28,7 +28,7 @@ namespace Solver_Kernels
         return std::abs( (-c2 + std::sqrt(c2*c2 - 3*c1*c3)) / (3*c1) ) / r;
     }
     scalar ncg_beta_polak_ribiere(vectorfield & image, vectorfield & force, vectorfield & residual,
-        vectorfield & residual_last, vectorfield & force_virtual);
+        vectorfield & residual_last, vectorfield & torque);
     scalar ncg_dir_max(vectorfield & direction, vectorfield & residual, scalar beta, vectorfield & axis);
     void full_inexact_line_search(const Data::Spin_System & system,
         const vectorfield & image, vectorfield & image_displaced,

@@ -78,26 +78,26 @@ font-family: \&quot;Courier\&quot;</string>
          </widget>
         </item>
         <item row="10" column="0">
-         <widget class="QLabel" name="m_Label_Force_Max">
+         <widget class="QLabel" name="m_Label_Torque_Max">
           <property name="styleSheet">
            <string notr="true">color:white;
 background: transparent;
 font-family: &quot;Courier&quot;</string>
           </property>
           <property name="text">
-           <string>Force (max) =</string>
+           <string>Torque (max) =</string>
           </property>
          </widget>
         </item>
         <item row="14" column="0">
-         <widget class="QLabel" name="m_Label_Force_Current_2">
+         <widget class="QLabel" name="m_Label_Torque_Current_2">
           <property name="styleSheet">
            <string notr="true">color:white;
 background: transparent;
 font-family: &quot;Courier&quot;</string>
           </property>
           <property name="text">
-           <string>Force (current) =</string>
+           <string>Torque (current) =</string>
           </property>
          </widget>
         </item>
@@ -193,14 +193,14 @@ font-family: &quot;Courier&quot;</string>
          </widget>
         </item>
         <item row="11" column="0">
-         <widget class="QLabel" name="m_Label_Force_Current">
+         <widget class="QLabel" name="m_Label_Torque_Current">
           <property name="styleSheet">
            <string notr="true">color:white;
 background: transparent;
 font-family: &quot;Courier&quot;</string>
           </property>
           <property name="text">
-           <string>Force (current) =</string>
+           <string>Torque (current) =</string>
           </property>
          </widget>
         </item>
@@ -217,14 +217,14 @@ font-family: &quot;Courier&quot;</string>
          </widget>
         </item>
         <item row="13" column="0">
-         <widget class="QLabel" name="m_Label_Force_Max_2">
+         <widget class="QLabel" name="m_Label_Torque_Max_2">
           <property name="styleSheet">
            <string notr="true">color:white;
 background: transparent;
 font-family: &quot;Courier&quot;</string>
           </property>
           <property name="text">
-           <string>Force (max) =</string>
+           <string>Torque (max) =</string>
           </property>
          </widget>
         </item>

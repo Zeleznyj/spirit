@@ -21,8 +21,8 @@ namespace Data
         // Maximum walltime for Iterate in seconds
         long int max_walltime_sec = 0;
 
-        // Force convergence criterium
-        scalar force_convergence = 1e-10;
+        // Torque convergence criterium
+        scalar torque_convergence = 1e-10;
 
         // ----------------- Output --------------
         // Data output folder

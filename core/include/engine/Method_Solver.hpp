@@ -81,27 +81,27 @@ namespace Engine
             Log(Utility::Log_Level::Error, Utility::Log_Sender::All, "Tried to use Method_Solver::Calculate_Force() of the Method_Solver class!", this->idx_image, this->idx_chain);
         }
 
-        // Calculate virtual Forces onto Systems (can be precession and damping forces, correctly scaled)
-        // Calculate the effective force on a configuration. It is a combination of
+        // Calculate torques onto systems (can be precession and damping torques, correctly scaled)
+        // Calculate the effective torque on a configuration. It is a combination of
         //      precession and damping terms for the Hamiltonian, spin currents and
         //      temperature. This function is used in `the Solver_...` functions.
         // Default implementation: direct minimization
-        virtual void Calculate_Force_Virtual(
+        virtual void Calculate_Torque(
             const std::vector<std::shared_ptr<vectorfield>> & configurations,
             const std::vector<vectorfield> & forces,
-            std::vector<vectorfield> & forces_virtual)
+            std::vector<vectorfield> & torques)
         {
             // Not Implemented!
-            Log(Utility::Log_Level::Error, Utility::Log_Sender::All, "Tried to use Method_Solver::Calculate_Force_Virtual() of the Method_Solver class!", this->idx_image, this->idx_chain);
+            Log(Utility::Log_Level::Error, Utility::Log_Sender::All, "Tried to use Method_Solver::Calculate_Torque() of the Method_Solver class!", this->idx_image, this->idx_chain);
         }
 
 
-        // Calculate maximum of absolute values of force components for a spin configuration
-        virtual scalar Force_on_Image_MaxAbsComponent(const vectorfield & image, vectorfield & force) final;
+        // Calculate maximum of absolute values of torque components for a spin configuration
+        virtual scalar Torque_on_Image_MaxAbsComponent(const vectorfield & image, vectorfield & torque) final;
 
         // ...
         // virtual bool Iterations_Allowed() override;
-        // Check if the forces are converged
+        // Check if the torques are converged
         virtual bool Converged();
 
         // Check if any stop criteria were encountered
@@ -124,9 +124,9 @@ namespace Engine
 
 
         //////////// DEPONDT ////////////////////////////////////////////////////////////
-        // Temporaries for virtual forces
+        // Temporaries for torques
         std::vector<vectorfield> rotationaxis;
-        std::vector<scalarfield> forces_virtual_norm;
+        std::vector<scalarfield> torques_norm;
         // Preccession angle
         scalarfield angle;
 
@@ -145,6 +145,7 @@ namespace Engine
         // Step sizes
         // std::vector<scalarfield> alpha, beta;
         scalarfield beta;
+        scalarfield dir_max;
 
         // TODO: right type might be std::vector<scalar> and NOT std::vector<scalarfield>
         // Delta scalarfields
@@ -182,9 +183,9 @@ namespace Engine
         // Actual Forces on the configurations
         std::vector<vectorfield> forces;
         std::vector<vectorfield> forces_predictor;
-        // Virtual Forces used in the Steps
-        std::vector<vectorfield> forces_virtual;
-        std::vector<vectorfield> forces_virtual_predictor;
+        // Torques used in the steps
+        std::vector<vectorfield> torques;
+        std::vector<vectorfield> torques_predictor;
 
         // RK 4
         std::vector<std::shared_ptr<vectorfield>> configurations_k1;
@@ -202,22 +203,22 @@ namespace Engine
     };
 
 
-    // Return the maximum of absolute values of force components for an image
+    // Return the maximum of absolute values of torque components for an image
     template<Solver solver>
-    scalar Method_Solver<solver>::Force_on_Image_MaxAbsComponent(const vectorfield & image, vectorfield & force)
+    scalar Method_Solver<solver>::Torque_on_Image_MaxAbsComponent(const vectorfield & image, vectorfield & torque)
     {
         // Take out component in direction of v2
-        Manifoldmath::project_tangential(force, image);
+        Manifoldmath::project_tangential(torque, image);
 
-        // We want the Maximum of Absolute Values of all force components on all images
-        return Vectormath::max_abs_component(force);
+        // We want the Maximum of Absolute Values of all torque components on all images
+        return Vectormath::max_abs_component(torque);
     }
 
     template<Solver solver>
     bool Method_Solver<solver>::Converged()
     {
         bool converged = false;
-        if( this->force_max_abs_component < this->parameters->force_convergence ) converged = true;
+        if( this->torque_max_abs_component < this->parameters->torque_convergence ) converged = true;
         return converged;
     }
 
@@ -252,8 +253,8 @@ namespace Engine
                 fmt::format("------------  Started  {} Calculation  ------------", this->Name()),
                 fmt::format("    Going to iterate {} step(s)", this->n_log),
                 fmt::format("                with {} iterations per step", this->n_iterations_log),
-                fmt::format("    Force convergence parameter: {:." + fmt::format("{}", this->print_precision) + "f}", this->parameters->force_convergence),
-                fmt::format("    Maximum force component:     {:." + fmt::format("{}", this->print_precision) + "f}", this->force_max_abs_component),
+                fmt::format("    Torque convergence parameter: {:." + fmt::format("{}", this->print_precision) + "f}", this->parameters->torque_convergence),
+                fmt::format("    Maximum torque component:     {:." + fmt::format("{}", this->print_precision) + "f}", this->torque_max_abs_component),
                 fmt::format("    Solver: {}", this->SolverFullName()),
                 "-----------------------------------------------------"
             }, this->idx_image, this->idx_chain);
@@ -275,8 +276,8 @@ namespace Engine
                 fmt::format("    Iteration                    {} / {}", this->iteration, this->n_iterations),
                 fmt::format("    Time since last step:        {}", Timing::DateTimePassed(t_current - this->t_last)),
                 fmt::format("    Iterations / sec:            {}", this->n_iterations_log / Timing::SecondsPassed(t_current - this->t_last)),
-                fmt::format("    Force convergence parameter: {:." + fmt::format("{}", this->print_precision) + "f}", this->parameters->force_convergence),
-                fmt::format("    Maximum force component:     {:." + fmt::format("{}", this->print_precision) + "f}", this->force_max_abs_component)
+                fmt::format("    Torque convergence parameter: {:." + fmt::format("{}", this->print_precision) + "f}", this->parameters->torque_convergence),
+                fmt::format("    Maximum torque component:     {:." + fmt::format("{}", this->print_precision) + "f}", this->torque_max_abs_component)
             }, this->idx_image, this->idx_chain);
 
         // Update time of last step
@@ -296,7 +297,7 @@ namespace Engine
         if( this->StopFile_Present() )
             reason = "A STOP file has been found";
         else if( this->Converged() )
-            reason = "The force converged";
+            reason = "The torque converged";
         else if( this->Walltime_Expired(t_end - this->t_start) )
             reason = "The maximum walltime has been reached";
 
@@ -311,8 +312,8 @@ namespace Engine
         if( this->Name() == "LLG" )
             block.push_back(fmt::format("    Simulated time:   {} ps", this->getTime()));
         block.push_back(fmt::format("    Iterations / sec: {}", this->iteration / Timing::SecondsPassed(t_end - this->t_start)));
-        block.push_back(fmt::format("    Force convergence parameter: {:."+fmt::format("{}",this->print_precision)+"f}", this->parameters->force_convergence));
-        block.push_back(fmt::format("    Maximum force component:     {:."+fmt::format("{}",this->print_precision)+"f}", this->force_max_abs_component));
+        block.push_back(fmt::format("    Torque convergence parameter: {:."+fmt::format("{}",this->print_precision)+"f}", this->parameters->torque_convergence));
+        block.push_back(fmt::format("    Maximum torque component:     {:."+fmt::format("{}",this->print_precision)+"f}", this->torque_max_abs_component));
         block.push_back(fmt::format("    Solver: " + this->SolverFullName()));
         block.push_back("-----------------------------------------------------");
         Log.SendBlock(Log_Level::All, this->SenderName, block, this->idx_image, this->idx_chain);
@@ -338,6 +339,7 @@ namespace Engine
     #include <engine/Solver_RK4.hpp>
     #include <engine/Solver_VP.hpp>
     #include <engine/Solver_NCG.hpp>
+    // #include <engine/Solver_LBFGS.hpp>
 }
 
 #endif

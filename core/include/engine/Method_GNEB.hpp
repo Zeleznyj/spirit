@@ -21,8 +21,8 @@ namespace Engine
         // Constructor
         Method_GNEB(std::shared_ptr<Data::Spin_System_Chain> chain, int idx_chain);
 
-        // Return maximum force components of the images in the chain
-        std::vector<scalar> getForceMaxAbsComponent_All() override;
+        // Return maximum torque components of the images in the chain
+        std::vector<scalar> getTorqueMaxAbsComponent_All() override;
 
         // Method name as string
         std::string Name() override;
@@ -30,9 +30,9 @@ namespace Engine
     private:
         // Calculate Forces onto Systems
         void Calculate_Force(const std::vector<std::shared_ptr<vectorfield>> & configurations, std::vector<vectorfield> & forces) override;
-        void Calculate_Force_Virtual(const std::vector<std::shared_ptr<vectorfield>> & configurations, const std::vector<vectorfield> & forces, std::vector<vectorfield> & forces_virtual) override;
+        void Calculate_Torque(const std::vector<std::shared_ptr<vectorfield>> & configurations, const std::vector<vectorfield> & forces, std::vector<vectorfield> & torques) override;
         
-        // Check if the Forces are converged
+        // Check if the Torques are converged
         bool Converged() override;
 
 

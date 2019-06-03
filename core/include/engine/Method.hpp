@@ -45,12 +45,12 @@ namespace Engine
         // Get the number of milliseconds since the Method started iterating
         virtual int getWallTime() final;
 
-        // Maximum of the absolutes of all components of the force - needs to be updated at each calculation
-        virtual scalar getForceMaxAbsComponent() final;
+        // Maximum of the absolutes of all components of the torque - needs to be updated at each calculation
+        virtual scalar getTorqueMaxAbsComponent() final;
 
         // Maximum of the absolutes of all components of the force for all images the method uses
-        // The default is that this returns simply {getForceMaxAbsComponent()}
-        virtual std::vector<scalar> getForceMaxAbsComponent_All();
+        // The default is that this returns simply {getTorqueMaxAbsComponent()}
+        virtual std::vector<scalar> getTorqueMaxAbsComponent_All();
 
         // ------------------------------------------------------
 
@@ -152,10 +152,10 @@ namespace Engine
 
         // Method name as enum
         Utility::Log_Sender SenderName;
-        // Maximum force component of all images
-        scalar force_max_abs_component;
-        // Maximum force component per image
-        std::vector<scalar> force_max_abs_component_all;
+        // Maximum torque component of all images
+        scalar torque_max_abs_component;
+        // Maximum torque component per image
+        std::vector<scalar> torque_max_abs_component_all;
         // History of relevant quantities
         std::map<std::string, std::vector<scalar>> history;
 

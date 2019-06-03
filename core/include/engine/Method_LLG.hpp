@@ -31,9 +31,9 @@ namespace Engine
         void Prepare_Thermal_Field() override;
         // Calculate Forces onto Systems
         void Calculate_Force(const std::vector<std::shared_ptr<vectorfield>> & configurations, std::vector<vectorfield> & forces) override;
-        void Calculate_Force_Virtual(const std::vector<std::shared_ptr<vectorfield>> & configurations, const std::vector<vectorfield> & forces, std::vector<vectorfield> & forces_virtual) override;
+        void Calculate_Torque(const std::vector<std::shared_ptr<vectorfield>> & configurations, const std::vector<vectorfield> & forces, std::vector<vectorfield> & torques) override;
 
-        // Check if the Forces are converged
+        // Check if the Torques are converged
         bool Converged() override;
 
         // Save the current Step's Data: spins and energy
@@ -49,7 +49,7 @@ namespace Engine
         // Last calculated forces
         std::vector<vectorfield> Gradient;
         // Convergence parameters
-        std::vector<bool> force_converged;
+        std::vector<bool> torque_converged;
         // Temperature distribution
         scalarfield temperature_distribution;
         // Field for stt gradient method

@@ -17,10 +17,11 @@ namespace Utility
         Non_existing_Image,
         Non_existing_Chain,
         Input_parse_failed,
+        API_Invalid_Input,
         Bad_File_Content,
-		Standard_Exception,
-		CUDA_Error,
-		Unknown_Exception
+        Standard_Exception,
+        CUDA_Error,
+        Unknown_Exception
         // TODO: from Chain.cpp
         // Last image deletion ?
         // Empty clipboard     ?
@@ -55,7 +56,7 @@ namespace Utility
         {
             return _what.c_str();
         }
-        
+
         Exception_Classifier classifier;
         Log_Level level;
         std::string  message;
@@ -92,7 +93,7 @@ namespace Utility
     #define spirit_handle_exception_api(idx_image, idx_chain) Utility::Handle_Exception_API(__FILE__, __LINE__, __func__, idx_image, idx_chain)
 
     // Handle exception with backtrace and logging information on the calling core function
-    #define spirit_handle_exception_core(message) Utility::Handle_Exception_Core(message, __FILE__, __LINE__, __func__) 
+    #define spirit_handle_exception_core(message) Utility::Handle_Exception_Core(message, __FILE__, __LINE__, __func__)
 }
 
 #endif

@@ -155,11 +155,11 @@ try
 
     image->Lock();
     auto p = chain->gneb_parameters;
-    p->force_convergence = convergence;
+    p->torque_convergence = convergence;
     image->Unlock();
 
     Log(Utility::Log_Level::Info, Utility::Log_Sender::API,
-        fmt::format("Set GNEB force convergence = {}", convergence), idx_image, idx_chain);
+        fmt::format("Set GNEB torque convergence = {}", convergence), idx_image, idx_chain);
 }
 catch( ... )
 {
@@ -444,7 +444,7 @@ try
     from_indices( state, idx_image, idx_chain, image, chain );
 
     auto p = chain->gneb_parameters;
-    return (float)p->force_convergence;
+    return (float)p->torque_convergence;
 }
 catch( ... )
 {

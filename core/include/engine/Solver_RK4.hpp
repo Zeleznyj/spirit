@@ -2,10 +2,10 @@ template <> inline
 void Method_Solver<Solver::RungeKutta4>::Initialize ()
 {
     this->forces         = std::vector<vectorfield>( this->noi, vectorfield( this->nos, {0, 0, 0} ) );
-    this->forces_virtual = std::vector<vectorfield>( this->noi, vectorfield( this->nos, {0, 0, 0} ) );
+    this->torques = std::vector<vectorfield>( this->noi, vectorfield( this->nos, {0, 0, 0} ) );
 
     this->forces_predictor = std::vector<vectorfield>( this->noi, vectorfield( this->nos, {0, 0, 0} ) );
-    this->forces_virtual_predictor = std::vector<vectorfield>( this->noi, vectorfield( this->nos, {0, 0, 0} ) );
+    this->torques_predictor = std::vector<vectorfield>( this->noi, vectorfield( this->nos, {0, 0, 0} ) );
 
     this->configurations_temp  = std::vector<std::shared_ptr<vectorfield>>( this->noi );
     for (int i=0; i<this->noi; i++)
@@ -46,7 +46,7 @@ void Method_Solver<Solver::RungeKutta4>::Iteration ()
 
     // Get the actual forces on the configurations
     this->Calculate_Force(this->configurations, this->forces);
-    this->Calculate_Force_Virtual(this->configurations, this->forces, this->forces_virtual);
+    this->Calculate_Torque(this->configurations, this->forces, this->torques);
 
     // Predictor for each image
     for (int i = 0; i < this->noi; ++i)
@@ -54,7 +54,7 @@ void Method_Solver<Solver::RungeKutta4>::Iteration ()
         auto& conf           = *this->configurations[i];
         auto& k1             = *this->configurations_k1[i];
         auto& conf_predictor = *this->configurations_predictor[i];
-        auto& force          =  this->forces_virtual[i];
+        auto& force          =  this->torques[i];
 
         // k1
         Vectormath::set_c_cross( -1, conf, force, k1 );
@@ -68,7 +68,7 @@ void Method_Solver<Solver::RungeKutta4>::Iteration ()
 
     // Calculate_Force for the predictor
     this->Calculate_Force(this->configurations_predictor, this->forces_predictor);
-    this->Calculate_Force_Virtual(this->configurations_predictor, this->forces_predictor, this->forces_virtual_predictor);
+    this->Calculate_Torque(this->configurations_predictor, this->forces_predictor, this->torques_predictor);
 
     // Predictor for each image
     for (int i = 0; i < this->noi; ++i)
@@ -76,7 +76,7 @@ void Method_Solver<Solver::RungeKutta4>::Iteration ()
         auto& conf           = *this->configurations[i];
         auto& k2             = *this->configurations_k2[i];
         auto& conf_predictor = *this->configurations_predictor[i];
-        auto& force          =  this->forces_virtual_predictor[i];
+        auto& force          =  this->torques_predictor[i];
 
         // k2
         Vectormath::set_c_cross( -1, conf_predictor, force, k2 );
@@ -90,7 +90,7 @@ void Method_Solver<Solver::RungeKutta4>::Iteration ()
 
     // Calculate_Force for the predictor (k3)
     this->Calculate_Force(this->configurations_predictor, this->forces_predictor);
-    this->Calculate_Force_Virtual(this->configurations_predictor, this->forces_predictor, this->forces_virtual_predictor);
+    this->Calculate_Torque(this->configurations_predictor, this->forces_predictor, this->torques_predictor);
 
     // Predictor for each image
     for (int i = 0; i < this->noi; ++i)
@@ -98,7 +98,7 @@ void Method_Solver<Solver::RungeKutta4>::Iteration ()
         auto& conf           = *this->configurations[i];
         auto& k3             = *this->configurations_k3[i];
         auto& conf_predictor = *this->configurations_predictor[i];
-        auto& force          =  this->forces_virtual_predictor[i];
+        auto& force          =  this->torques_predictor[i];
 
         // k3
         Vectormath::set_c_cross( -1, conf_predictor, force, k3 );
@@ -112,7 +112,7 @@ void Method_Solver<Solver::RungeKutta4>::Iteration ()
 
     // Calculate_Force for the predictor (k4)
     this->Calculate_Force(this->configurations_predictor, this->forces_predictor);
-    this->Calculate_Force_Virtual(this->configurations_predictor, this->forces_predictor, this->forces_virtual_predictor);
+    this->Calculate_Torque(this->configurations_predictor, this->forces_predictor, this->torques_predictor);
 
     // Corrector step for each image
     for (int i=0; i < this->noi; i++)
@@ -124,7 +124,7 @@ void Method_Solver<Solver::RungeKutta4>::Iteration ()
         auto& k4             = *this->configurations_k4[i];
         auto& conf_predictor = *this->configurations_predictor[i];
         auto& conf_temp      = *this->configurations_temp[i];
-        auto& force          =  this->forces_virtual_predictor[i];
+        auto& force          =  this->torques_predictor[i];
 
         // k4
         Vectormath::set_c_cross( -1, conf_predictor, force, k4 );

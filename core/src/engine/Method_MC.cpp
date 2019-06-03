@@ -30,13 +30,13 @@ namespace Engine
         this->xi = vectorfield(this->nos, {0,0,0});
 
         // We assume it is not converged before the first iteration
-        // this->force_max_abs_component = system->mc_parameters->force_convergence + 1.0;
+        // this->torque_max_abs_component = system->mc_parameters->torque_convergence + 1.0;
 
         // History
         this->history = std::map<std::string, std::vector<scalar>>{
-            {"max_torque_component", {this->force_max_abs_component}},
-            {"E", {this->force_max_abs_component}},
-            {"M_z", {this->force_max_abs_component}} };
+            {"max_torque_component", {this->torque_max_abs_component}},
+            {"E", {this->torque_max_abs_component}},
+            {"M_z", {this->torque_max_abs_component}} };
 
         this->parameters_mc = system->mc_parameters;
 

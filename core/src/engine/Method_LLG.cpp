@@ -30,21 +30,21 @@ namespace Engine
 
         // Forces
         this->forces    = std::vector<vectorfield>(this->noi, vectorfield(this->nos));
-        this->forces_virtual    = std::vector<vectorfield>(this->noi, vectorfield(this->nos));
+        this->torques    = std::vector<vectorfield>(this->noi, vectorfield(this->nos));
         this->Gradient = std::vector<vectorfield>(this->noi, vectorfield(this->nos));
         this->xi = vectorfield(this->nos, {0,0,0});
         this->s_c_grad = vectorfield(this->nos, {0,0,0});
         this->temperature_distribution = scalarfield(this->nos, 0);
 
         // We assume it is not converged before the first iteration
-        this->force_converged = std::vector<bool>(this->noi, false);
-        this->force_max_abs_component = system->llg_parameters->force_convergence + 1.0;
+        this->torque_converged = std::vector<bool>(this->noi, false);
+        this->torque_max_abs_component = system->llg_parameters->torque_convergence + 1.0;
 
         // History
         this->history = std::map<std::string, std::vector<scalar>>{
-            {"max_torque_component", {this->force_max_abs_component}},
-            {"E", {this->force_max_abs_component}},
-            {"M_z", {this->force_max_abs_component}} };
+            {"max_torque_component", {this->torque_max_abs_component}},
+            {"E", {this->torque_max_abs_component}},
+            {"M_z", {this->torque_max_abs_component}} };
 
         // Create shared pointers to the method's systems' spin configurations
         this->configurations = std::vector<std::shared_ptr<vectorfield>>(this->noi);
@@ -59,8 +59,8 @@ namespace Engine
         // Initial force calculation s.t. it does not seem to be already converged
         this->Prepare_Thermal_Field();
         this->Calculate_Force(this->configurations, this->forces);
-        this->Calculate_Force_Virtual(this->configurations, this->forces, this->forces_virtual);
-        // Post iteration hook to get forceMaxAbsComponent etc
+        this->Calculate_Torque(this->configurations, this->forces, this->torques);
+        // Post iteration hook to get torqueMaxAbsComponent etc
         this->Hook_Post_Iteration();
     }
 
@@ -134,15 +134,15 @@ namespace Engine
     }
 
     template <Solver solver>
-    void Method_LLG<solver>::Calculate_Force_Virtual(const std::vector<std::shared_ptr<vectorfield>> & configurations, const std::vector<vectorfield> & forces, std::vector<vectorfield> & forces_virtual)
+    void Method_LLG<solver>::Calculate_Torque(const std::vector<std::shared_ptr<vectorfield>> & configurations, const std::vector<vectorfield> & forces, std::vector<vectorfield> & torques)
     {
         using namespace Utility;
 
         for (unsigned int i=0; i<configurations.size(); ++i)
         {
-            auto& image = *configurations[i];
-            auto& force = forces[i];
-            auto& force_virtual = forces_virtual[i];
+            auto& image      = *configurations[i];
+            auto& force      = forces[i];
+            auto& torque     = torques[i];
             auto& parameters = *this->systems[i]->llg_parameters;
 
             //////////
@@ -165,16 +165,16 @@ namespace Engine
             if (parameters.direct_minimization || solver == Solver::VP)
             {
                 dtg = parameters.dt * Constants::gamma / Constants::mu_B;
-                Vectormath::set_c_cross( dtg, image, force, force_virtual);
+                Vectormath::set_c_cross( dtg, image, force, torque);
             }
             // Dynamics simulation
             else
             {
                 auto& geometry = *this->systems[0]->geometry;
 
-                Vectormath::set_c_a(dtg, force, force_virtual);
-                Vectormath::add_c_cross(dtg * damping, image, force, force_virtual);
-                Vectormath::scale(force_virtual, geometry.mu_s, true);
+                Vectormath::set_c_a(dtg, force, torque);
+                Vectormath::add_c_cross(dtg * damping, image, force, torque);
+                Vectormath::scale(torque, geometry.mu_s, true);
 
                 // STT
                 if (a_j > 0)
@@ -184,28 +184,28 @@ namespace Engine
                         auto& boundary_conditions = this->systems[0]->hamiltonian->boundary_conditions;
                         // Gradient approximation for in-plane currents
                         Vectormath::directional_gradient(image, geometry, boundary_conditions, je, s_c_grad); // s_c_grad = (j_e*grad)*S
-                        Vectormath::add_c_a    ( dtg * a_j * ( damping - beta ), s_c_grad, force_virtual); // TODO: a_j durch b_j ersetzen
-                        Vectormath::add_c_cross( dtg * a_j * ( 1 + beta * damping ), s_c_grad, image, force_virtual); // TODO: a_j durch b_j ersetzen
+                        Vectormath::add_c_a    ( dtg * a_j * ( damping - beta ), s_c_grad, torque); // TODO: a_j durch b_j ersetzen
+                        Vectormath::add_c_cross( dtg * a_j * ( 1 + beta * damping ), s_c_grad, image, torque); // TODO: a_j durch b_j ersetzen
                         // Gradient in current richtung, daher => *(-1)
                     }
                     else
                     {
                         // Monolayer approximation
-                        Vectormath::add_c_a    (-dtg * a_j * ( damping - beta ), s_c_vec, force_virtual);
-                        Vectormath::add_c_cross(-dtg * a_j * ( 1 + beta * damping ), s_c_vec, image, force_virtual);
+                        Vectormath::add_c_a    (-dtg * a_j * ( damping - beta ), s_c_vec, torque);
+                        Vectormath::add_c_cross(-dtg * a_j * ( 1 + beta * damping ), s_c_vec, image, torque);
                     }
                 }
 
                 // Temperature
                 if( parameters.temperature > 0 || parameters.temperature_gradient_inclination != 0 )
                 {
-                    Vectormath::add_c_a    (1, this->xi, force_virtual);
-                    Vectormath::add_c_cross(damping, image, this->xi, force_virtual);
+                    Vectormath::add_c_a    (1, this->xi, torque);
+                    Vectormath::add_c_cross(damping, image, this->xi, torque);
                 }
             }
             // Apply Pinning
             #ifdef SPIRIT_ENABLE_PINNING
-                Vectormath::set_c_a(1, force_virtual, force_virtual, this->systems[0]->geometry->mask_unpinned);
+                Vectormath::set_c_a(1, torque, torque, this->systems[0]->geometry->mask_unpinned);
             #endif // SPIRIT_ENABLE_PINNING
         }
     }
@@ -220,8 +220,8 @@ namespace Engine
     bool Method_LLG<solver>::Converged()
     {
         // Check if all images converged
-        return std::all_of(this->force_converged.begin(),
-                            this->force_converged.end(),
+        return std::all_of(this->torque_converged.begin(),
+                            this->torque_converged.end(),
                             [](bool b) { return b; });
     }
 
@@ -238,14 +238,14 @@ namespace Engine
         this->picoseconds_passed += this->systems[0]->llg_parameters->dt;
 
         // --- Convergence Parameter Update
-        // Loop over images to calculate the maximum force components
+        // Loop over images to calculate the maximum torque components
         for (unsigned int img = 0; img < this->systems.size(); ++img)
         {
-            this->force_converged[img] = false;
-            auto fmax = this->Force_on_Image_MaxAbsComponent(*(this->systems[img]->spins), this->forces_virtual[img]);
-            if (fmax > 0) this->force_max_abs_component = fmax;
-            else this->force_max_abs_component = 0;
-            if (fmax < this->systems[img]->llg_parameters->force_convergence) this->force_converged[img] = true;
+            this->torque_converged[img] = false;
+            auto fmax = this->Torque_on_Image_MaxAbsComponent(*(this->systems[img]->spins), this->torques[img]);
+            if (fmax > 0) this->torque_max_abs_component = fmax;
+            else this->torque_max_abs_component = 0;
+            if (fmax < this->systems[img]->llg_parameters->torque_convergence) this->torque_converged[img] = true;
         }
 
         // --- Image Data Update
@@ -292,7 +292,7 @@ namespace Engine
     void Method_LLG<solver>::Save_Current(std::string starttime, int iteration, bool initial, bool final)
     {
         // History save
-        this->history["max_torque_component"].push_back(this->force_max_abs_component);
+        this->history["max_torque_component"].push_back(this->torque_max_abs_component);
         this->systems[0]->UpdateEnergy();
         this->history["E"].push_back(this->systems[0]->E);
         auto mag = Engine::Vectormath::Magnetization(*this->systems[0]->spins);
@@ -329,7 +329,7 @@ namespace Engine
                     // File name and comment
                     std::string spinsFile = preSpinsFile + suffix + ".ovf";
                     std::string output_comment = fmt::format( "{} simulation ({} solver)\n#       Iteration: {}\n#       Maximum force component: {}",
-                        this->Name(), this->SolverFullName(), iteration, this->force_max_abs_component );
+                        this->Name(), this->SolverFullName(), iteration, this->torque_max_abs_component );
 
                     // File format
                     IO::VF_FileFormat format = this->systems[0]->llg_parameters->output_vf_filetype;

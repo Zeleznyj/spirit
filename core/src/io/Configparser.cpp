@@ -702,7 +702,7 @@ namespace IO
                 myfile.Read_Single(parameters->stt_magnitude, "llg_stt_magnitude");
                 myfile.Read_Vector3(parameters->stt_polarisation_normal, "llg_stt_polarisation_normal");
                 parameters->stt_polarisation_normal.normalize();
-                myfile.Read_Single(parameters->force_convergence, "llg_force_convergence");
+                myfile.Read_Single(parameters->torque_convergence, "llg_torque_convergence");
             }
             catch( ... )
             {
@@ -725,7 +725,7 @@ namespace IO
         Log(Log_Level::Parameter, Log_Sender::IO, fmt::format("        {:<17} = {}", "stt use gradient", parameters->stt_use_gradient));
         Log(Log_Level::Parameter, Log_Sender::IO, fmt::format("        {:<17} = {}", "stt magnitude", parameters->stt_magnitude));
         Log(Log_Level::Parameter, Log_Sender::IO, fmt::format("        {:<17} = {}", "stt normal", parameters->stt_polarisation_normal.transpose()));
-        Log(Log_Level::Parameter, Log_Sender::IO, fmt::format("        {:<17} = {:e}", "force convergence", parameters->force_convergence));
+        Log(Log_Level::Parameter, Log_Sender::IO, fmt::format("        {:<17} = {:e}", "torque convergence", parameters->torque_convergence));
         Log(Log_Level::Parameter, Log_Sender::IO, fmt::format("        {:<17} = {}", "maximum walltime", str_max_walltime));
         Log(Log_Level::Parameter, Log_Sender::IO, fmt::format("        {:<17} = {}", "n_iterations", parameters->n_iterations));
         Log(Log_Level::Parameter, Log_Sender::IO, fmt::format("        {:<17} = {}", "n_iterations_log", parameters->n_iterations_log));
@@ -934,7 +934,7 @@ namespace IO
                 myfile.Read_Single(str_max_walltime, "gneb_max_walltime");
                 parameters->max_walltime_sec = (long int)Utility::Timing::DurationFromString(str_max_walltime).count();
                 myfile.Read_Single(parameters->spring_constant, "gneb_spring_constant");
-                myfile.Read_Single(parameters->force_convergence, "gneb_force_convergence");
+                myfile.Read_Single(parameters->torque_convergence, "gneb_torque_convergence");
                 myfile.Read_Single(parameters->n_iterations, "gneb_n_iterations");
                 myfile.Read_Single(parameters->n_iterations_log, "gneb_n_iterations_log");
                 myfile.Read_Single(parameters->n_E_interpolations, "gneb_n_energy_interpolations");
@@ -952,7 +952,7 @@ namespace IO
         Log(Log_Level::Parameter, Log_Sender::IO, "Parameters GNEB:");
         Log(Log_Level::Parameter, Log_Sender::IO, fmt::format("        {:<18} = {}", "spring_constant", parameters->spring_constant));
         Log(Log_Level::Parameter, Log_Sender::IO, fmt::format("        {:<18} = {}", "n_E_interpolations", parameters->n_E_interpolations));
-        Log(Log_Level::Parameter, Log_Sender::IO, fmt::format("        {:<18} = {:e}", "force convergence", parameters->force_convergence));
+        Log(Log_Level::Parameter, Log_Sender::IO, fmt::format("        {:<18} = {:e}", "torque convergence", parameters->torque_convergence));
         Log(Log_Level::Parameter, Log_Sender::IO, fmt::format("        {:<18} = {}", "maximum walltime", str_max_walltime));
         Log(Log_Level::Parameter, Log_Sender::IO, fmt::format("        {:<18} = {}", "n_iterations", parameters->n_iterations));
         Log(Log_Level::Parameter, Log_Sender::IO, fmt::format("        {:<18} = {}", "n_iterations_log", parameters->n_iterations_log));
@@ -1005,7 +1005,7 @@ namespace IO
                 // Method parameters
                 myfile.Read_Single(str_max_walltime,  "mmf_max_walltime");
                 parameters->max_walltime_sec = (long int)Utility::Timing::DurationFromString(str_max_walltime).count();
-                myfile.Read_Single(parameters->force_convergence, "mmf_force_convergence");
+                myfile.Read_Single(parameters->torque_convergence, "mmf_torque_convergence");
                 myfile.Read_Single(parameters->n_iterations,      "mmf_n_iterations");
                 myfile.Read_Single(parameters->n_iterations_log,  "mmf_n_iterations_log");
                 myfile.Read_Single(parameters->n_modes,           "mmf_n_modes");
@@ -1022,7 +1022,7 @@ namespace IO
 
         // Return
         Log(Log_Level::Parameter, Log_Sender::IO, "Parameters MMF:");
-        Log(Log_Level::Parameter, Log_Sender::IO, fmt::format("        {:<17} = {:e}", "force convergence", parameters->force_convergence));
+        Log(Log_Level::Parameter, Log_Sender::IO, fmt::format("        {:<17} = {:e}", "torque convergence", parameters->torque_convergence));
         Log(Log_Level::Parameter, Log_Sender::IO, fmt::format("        {:<17} = {}", "maximum walltime", str_max_walltime));
         Log(Log_Level::Parameter, Log_Sender::IO, fmt::format("        {:<17} = {}", "n_iterations", parameters->n_iterations));
         Log(Log_Level::Parameter, Log_Sender::IO, fmt::format("        {:<17} = {}", "n_iterations_log", parameters->n_iterations_log));

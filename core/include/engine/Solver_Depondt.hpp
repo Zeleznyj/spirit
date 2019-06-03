@@ -2,14 +2,14 @@ template <> inline
 void Method_Solver<Solver::Depondt>::Initialize ()
 {
     this->forces         = std::vector<vectorfield>( this->noi, vectorfield( this->nos, {0, 0, 0} ) );
-    this->forces_virtual = std::vector<vectorfield>( this->noi, vectorfield( this->nos, {0, 0, 0} ) );
+    this->torques = std::vector<vectorfield>( this->noi, vectorfield( this->nos, {0, 0, 0} ) );
 
     this->forces_predictor = std::vector<vectorfield>( this->noi, vectorfield( this->nos, {0, 0, 0} ) );
-    this->forces_virtual_predictor = std::vector<vectorfield>( this->noi, vectorfield( this->nos, {0, 0, 0} ) );
+    this->torques_predictor = std::vector<vectorfield>( this->noi, vectorfield( this->nos, {0, 0, 0} ) );
 
     this->rotationaxis = std::vector<vectorfield>( this->noi, vectorfield( this->nos, {0, 0, 0} ) );
     this->angle = scalarfield( this->nos, 0 );
-    this->forces_virtual_norm = std::vector<scalarfield>( this->noi, scalarfield( this->nos, 0 ) );
+    this->torques_norm = std::vector<scalarfield>( this->noi, scalarfield( this->nos, 0 ) );
 
     this->configurations_predictor = std::vector<std::shared_ptr<vectorfield>>( this->noi );
     for (int i=0; i<this->noi; i++)
@@ -34,7 +34,7 @@ void Method_Solver<Solver::Depondt>::Iteration ()
 
     // Get the actual forces on the configurations
     this->Calculate_Force(this->configurations, this->forces);
-    this->Calculate_Force_Virtual(this->configurations, this->forces, this->forces_virtual);
+    this->Calculate_Torque(this->configurations, this->forces, this->torques);
 
     // Predictor for each image
     for (int i = 0; i < this->noi; ++i)
@@ -43,9 +43,9 @@ void Method_Solver<Solver::Depondt>::Iteration ()
         auto& conf_predictor = *this->configurations_predictor[i];
 
         // For Rotation matrix R := R( H_normed, angle )
-        Vectormath::norm( forces_virtual[i], angle );   // angle = |forces_virtual|
+        Vectormath::norm( torques[i], angle );   // angle = |torques|
 
-        Vectormath::set_c_a( 1, forces_virtual[i], rotationaxis[i] );  // rotationaxis = |forces_virtual|
+        Vectormath::set_c_a( 1, torques[i], rotationaxis[i] );  // rotationaxis = |torques|
         Vectormath::normalize_vectors( rotationaxis[i] );            // normalize rotation axis
 
         // Get spin predictor n' = R(H) * n
@@ -54,19 +54,19 @@ void Method_Solver<Solver::Depondt>::Iteration ()
 
     // Calculate_Force for the Corrector
     this->Calculate_Force(this->configurations_predictor, this->forces_predictor);
-    this->Calculate_Force_Virtual(this->configurations_predictor, this->forces_predictor, this->forces_virtual_predictor);
+    this->Calculate_Torque(this->configurations_predictor, this->forces_predictor, this->torques_predictor);
 
     // Corrector step for each image
     for (int i=0; i < this->noi; i++)
     {
         auto& conf   = *this->configurations[i];
 
-        // Calculate the linear combination of the two forces_virtuals
-        Vectormath::set_c_a( 0.5, forces_virtual[i], temp1);   // H = H/2
-        Vectormath::add_c_a( 0.5, forces_virtual_predictor[i], temp1 ); // H = (H + H')/2
+        // Calculate the linear combination of the two torquess
+        Vectormath::set_c_a( 0.5, torques[i], temp1);   // H = H/2
+        Vectormath::add_c_a( 0.5, torques_predictor[i], temp1 ); // H = (H + H')/2
 
         // Get the rotation angle as norm of temp1 ...For Rotation matrix R' := R( H'_normed, angle' )
-        Vectormath::norm( temp1, angle );   // angle' = |forces_virtual lin combination|
+        Vectormath::norm( temp1, angle );   // angle' = |torques lin combination|
 
         // Normalize temp1 to get rotation axes
         Vectormath::normalize_vectors( temp1 );

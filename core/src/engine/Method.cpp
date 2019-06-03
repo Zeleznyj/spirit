@@ -18,9 +18,9 @@ namespace Engine
         // Sender name for log messages
         this->SenderName = Log_Sender::All;
 
-        // Default history contains force_max_abs_component
+        // Default history contains torque_max_abs_component
         this->history = std::map<std::string, std::vector<scalar>>{
-            {"force_max_abs_component", {this->force_max_abs_component}} };
+            {"torque_max_abs_component", {this->torque_max_abs_component}} };
 
         // TODO: is this a good idea?
         this->n_iterations     = std::max(long(1), this->parameters->n_iterations);
@@ -141,15 +141,15 @@ namespace Engine
     }
 
 
-    scalar Method::getForceMaxAbsComponent()
+    scalar Method::getTorqueMaxAbsComponent()
     {
-        return this->force_max_abs_component;
+        return this->torque_max_abs_component;
     }
 
 
-    std::vector<scalar> Method::getForceMaxAbsComponent_All()
+    std::vector<scalar> Method::getTorqueMaxAbsComponent_All()
     {
-        return {this->force_max_abs_component};
+        return {this->torque_max_abs_component};
     }
 
 

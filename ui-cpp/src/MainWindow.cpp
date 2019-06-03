@@ -143,7 +143,7 @@ MainWindow::MainWindow(std::shared_ptr<State> state)
     this->m_Spacer_5 = new QLabel("  |  ");
     Ui::MainWindow::statusBar->addPermanentWidget(m_Spacer_5);
     //		Torque
-    this->m_Label_Torque = new QLabel("F_max: -");
+    this->m_Label_Torque = new QLabel("T_max: -");
     Ui::MainWindow::statusBar->addPermanentWidget(m_Label_Torque);
     //		Spacer
     this->m_Spacer_4 = new QLabel("  |  ");
@@ -830,7 +830,7 @@ void MainWindow::createStatusBar()
         this->m_Spacer_5 = new QLabel("|  ");
         Ui::MainWindow::statusBar->addPermanentWidget(this->m_Spacer_5);
         //		Torque
-        this->m_Label_Torque = new QLabel("F_max: -");
+        this->m_Label_Torque = new QLabel("T_max: -");
         Ui::MainWindow::statusBar->addPermanentWidget(this->m_Label_Torque);
         //		Spacer
         this->m_Spacer_4 = new QLabel("  |  ");
@@ -924,9 +924,9 @@ void MainWindow::updateStatusBar()
 {
     this->m_Label_FPS->setText(QString::fromLatin1("FPS: ") + QString::number((int)this->spinWidget->getFramesPerSecond()));
 
-    float F = Simulation_Get_MaxTorqueComponent(state.get());
+    float max_torque_component = Simulation_Get_MaxTorqueComponent(state.get());
     if (!Simulation_Running_On_Chain(state.get()))
-        this->m_Label_Torque->setText(QString::fromLatin1("F_max: ") + QString::number(F, 'E', 2));
+        this->m_Label_Torque->setText(QString::fromLatin1("T_max: ") + QString::number(max_torque_component, 'E', 2));
 
         double E = System_Get_Energy(state.get()) / System_Get_NOS(state.get());
         this->m_Label_E->setText(QString::fromLatin1("E: ") + QString::number(E, 'f', 6) + QString::fromLatin1("  "));
@@ -943,10 +943,10 @@ void MainWindow::updateStatusBar()
 
     if (Simulation_Running_On_Chain(state.get()))
     {
-        float * f = new float[Chain_Get_NOI(state.get())];
-        Simulation_Get_Chain_MaxTorqueComponents(state.get(), f);
-        float f_current = f[System_Get_Index(state.get())];
-        this->m_Label_Torque->setText(QString::fromLatin1("F_current: ") + QString::number(f_current, 'E', 2) + QString::fromLatin1("  F_max: ") + QString::number(F, 'E', 2));
+        float * torques = new float[Chain_Get_NOI(state.get())];
+        Simulation_Get_Chain_MaxTorqueComponents(state.get(), torques);
+        float torque_current = torques[System_Get_Index(state.get())];
+        this->m_Label_Torque->setText(QString::fromLatin1("T_current: ") + QString::number(torque_current, 'E', 2) + QString::fromLatin1("  T_max: ") + QString::number(max_torque_component, 'E', 2));
         ips = Simulation_Get_IterationsPerSecond(state.get(), -1);
         if (ips < 1) precision = 4;
         else if (ips > 99) precision = 0;

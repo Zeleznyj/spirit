@@ -195,11 +195,11 @@ void Parameters_LLG_Set_Convergence(State *state, float convergence, int idx_ima
 
         image->Lock();
         auto p = image->llg_parameters;
-        p->force_convergence = convergence;
+        p->torque_convergence = convergence;
         image->Unlock();
 
         Log(Utility::Log_Level::Info, Utility::Log_Sender::API,
-            fmt::format("Set LLG force convergence = {}", convergence), idx_image, idx_chain);
+            fmt::format("Set LLG torque convergence = {}", convergence), idx_image, idx_chain);
     }
     catch( ... )
     {
@@ -514,7 +514,7 @@ float Parameters_LLG_Get_Convergence( State *state, int idx_image, int idx_chain
         from_indices( state, idx_image, idx_chain, image, chain );
 
         auto p = image->llg_parameters;
-        return (float)p->force_convergence;
+        return (float)p->torque_convergence;
     }
     catch( ... )
     {

@@ -133,7 +133,7 @@ namespace Solver_Kernels
 
     __global__
     void cu_ncg_beta_polak_ribiere(Vector3 * image, Vector3 * force, Vector3 * residual,
-        Vector3 * residual_last, Vector3 * force_virtual, scalar * top, scalar * bot, size_t N)
+        Vector3 * residual_last, Vector3 * torque, scalar * top, scalar * bot, size_t N)
     {
         static const scalar dt = 1e-3;
         // scalar dt = this->systems[0]->llg_parameters->dt;
@@ -145,7 +145,7 @@ namespace Solver_Kernels
             residual[idx] = image[idx].cross(force[idx]);
             // TODO: this is for comparison with VP etc. and needs to be fixed!
             //       in fact, all solvers should use the force, not dt*force=displacement
-            force_virtual[idx] = dt * residual[idx];
+            torque[idx] = dt * residual[idx];
 
             bot[idx] += residual_last[idx].dot(residual_last[idx]);
             // Polak-Ribiere formula
@@ -158,14 +158,14 @@ namespace Solver_Kernels
     }
 
     scalar ncg_beta_polak_ribiere(vectorfield & image, vectorfield & force, vectorfield & residual,
-        vectorfield & residual_last, vectorfield & force_virtual)
+        vectorfield & residual_last, vectorfield & torque)
     {
         size_t N = image.size();
         scalarfield field_top(N, 0);
         scalarfield field_bot(N, 0);
 
         cu_ncg_beta_polak_ribiere<<<(N+1023)/1024, 1024>>>(image.data(), force.data(), residual.data(),
-            residual_last.data(), force_virtual.data(), field_top.data(), field_bot.data(), N);
+            residual_last.data(), torque.data(), field_top.data(), field_bot.data(), N);
         CU_CHECK_AND_SYNC();
         scalar top = Vectormath::sum(field_top);
         scalar bot = Vectormath::sum(field_bot);

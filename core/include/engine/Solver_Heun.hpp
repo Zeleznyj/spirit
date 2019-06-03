@@ -2,10 +2,10 @@ template <> inline
 void Method_Solver<Solver::Heun>::Initialize ()
 {
     this->forces         = std::vector<vectorfield>( this->noi, vectorfield( this->nos, {0, 0, 0} ) );
-    this->forces_virtual = std::vector<vectorfield>( this->noi, vectorfield( this->nos, {0, 0, 0} ) );
+    this->torques = std::vector<vectorfield>( this->noi, vectorfield( this->nos, {0, 0, 0} ) );
 
     this->forces_predictor = std::vector<vectorfield>( this->noi, vectorfield( this->nos, {0, 0, 0} ) );
-    this->forces_virtual_predictor = std::vector<vectorfield>( this->noi, vectorfield( this->nos, {0, 0, 0} ) );
+    this->torques_predictor = std::vector<vectorfield>( this->noi, vectorfield( this->nos, {0, 0, 0} ) );
 
     this->configurations_temp  = std::vector<std::shared_ptr<vectorfield>>( this->noi );
     for (int i=0; i<this->noi; i++)
@@ -35,7 +35,7 @@ void Method_Solver<Solver::Heun>::Iteration ()
 
     // Get the actual forces on the configurations
     this->Calculate_Force(this->configurations, this->forces);
-    this->Calculate_Force_Virtual(this->configurations, this->forces, this->forces_virtual);
+    this->Calculate_Torque(this->configurations, this->forces, this->torques);
 
     // Predictor for each image
     for (int i = 0; i < this->noi; ++i)
@@ -45,7 +45,7 @@ void Method_Solver<Solver::Heun>::Iteration ()
         auto& conf_predictor = *this->configurations_predictor[i];
 
         // First step - Predictor
-        Vectormath::set_c_cross( -1, conf, forces_virtual[i], conf_temp );  // temp1 = -( conf x A )
+        Vectormath::set_c_cross( -1, conf, torques[i], conf_temp );  // temp1 = -( conf x A )
         Vectormath::set_c_a( 1, conf, conf_predictor );                   // configurations_predictor = conf
         Vectormath::add_c_a( 1, conf_temp, conf_predictor );         // configurations_predictor = conf + dt*temp1
 
@@ -55,7 +55,7 @@ void Method_Solver<Solver::Heun>::Iteration ()
 
     // Calculate_Force for the Corrector
     this->Calculate_Force(this->configurations_predictor, this->forces_predictor);
-    this->Calculate_Force_Virtual(this->configurations_predictor, this->forces_predictor, this->forces_virtual_predictor);
+    this->Calculate_Torque(this->configurations_predictor, this->forces_predictor, this->torques_predictor);
 
     // Corrector step for each image
     for (int i=0; i < this->noi; i++)
@@ -67,7 +67,7 @@ void Method_Solver<Solver::Heun>::Iteration ()
         // Second step - Corrector
         Vectormath::scale( conf_temp, 0.5 );                                     // configurations_temp = 0.5 * configurations_temp
         Vectormath::add_c_a( 1, conf, conf_temp );                               // configurations_temp = conf + 0.5 * configurations_temp
-        Vectormath::set_c_cross( -1, conf_predictor, forces_virtual_predictor[i], temp1 );   // temp1 = - ( conf' x A' )
+        Vectormath::set_c_cross( -1, conf_predictor, torques_predictor[i], temp1 );   // temp1 = - ( conf' x A' )
         Vectormath::add_c_a( 0.5, temp1, conf_temp );                            // configurations_temp = conf + 0.5 * configurations_temp + 0.5 * temp1
 
         // Normalize spins

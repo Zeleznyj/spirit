@@ -29,7 +29,7 @@ namespace Engine
             Log(Utility::Log_Level::All, Utility::Log_Sender::HTST, "---- Prefactor calculation");
 
             const scalar epsilon = 1e-4;
-            const scalar epsilon_force = 1e-8;
+            const scalar epsilon_torque = 1e-8;
 
             auto& image_minimum = *htst_info.minimum->spins;
             auto& image_sp = *htst_info.saddle_point->spins;
@@ -50,10 +50,10 @@ namespace Engine
             Vectormath::set_c_a(1, gradient_minimum, force_tmp);
             Manifoldmath::project_tangential(force_tmp, image_minimum);
             scalar fmax_minimum = Vectormath::max_abs_component(force_tmp);
-            if( fmax_minimum > epsilon_force )
+            if( fmax_minimum > epsilon_torque )
             {
                 Log(Utility::Log_Level::Error, Utility::Log_Sender::All, fmt::format(
-                    "HTST: the initial configuration is not a converged minimum, its max. force component is above the threshold ({} > {})!", fmax_minimum, epsilon_force ));
+                    "HTST: the initial configuration is not a converged minimum, its max. torque component is above the threshold ({} > {})!", fmax_minimum, epsilon_torque ));
                 return;
             }
 
@@ -67,10 +67,10 @@ namespace Engine
             Vectormath::set_c_a(1, gradient_sp, force_tmp);
             Manifoldmath::project_tangential(force_tmp, image_sp);
             scalar fmax_sp = Vectormath::max_abs_component(force_tmp);
-            if( fmax_sp > epsilon_force )
+            if( fmax_sp > epsilon_torque )
             {
                 Log(Utility::Log_Level::Error, Utility::Log_Sender::All, fmt::format(
-                    "HTST: the transition configuration is not a converged saddle point, its max. force component is above the threshold ({} > {})!", fmax_sp, epsilon_force ));
+                    "HTST: the transition configuration is not a converged saddle point, its max. torque component is above the threshold ({} > {})!", fmax_sp, epsilon_torque ));
                 return;
             }
 
